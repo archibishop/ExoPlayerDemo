@@ -9,10 +9,13 @@ import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 
@@ -41,14 +44,25 @@ class MainActivity : Activity() {
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
 
-        var uri =  Uri.parse("https://archive.org/download/ElephantsDream/ed_hd.mp4")
+//        var uri =  Uri.parse("https://archive.org/download/ElephantsDream/ed_hd.mp4")
+        var uri =  Uri.parse(getString(R.string.media_url_mp4))
 
         var mediaSource = buildMediaSource(uri)
         player?.prepare(mediaSource, true, true)
     }
 
     private fun buildMediaSource(uri:Uri): MediaSource {
-        return ExtractorMediaSource.Factory(DefaultHttpDataSourceFactory("exoplayer-codelab")).createMediaSource(uri)
+//        return ExtractorMediaSource.Factory(DefaultHttpDataSourceFactory("exoplayer-codelab")).createMediaSource(uri)
+        var defaultExtractorsFactory = DefaultExtractorsFactory()
+        var dataSourceFactory  = DefaultHttpDataSourceFactory("user-agent")
+
+        var videoSource = ExtractorMediaSource.Factory(DefaultHttpDataSourceFactory("exoplayer-codelab")).createMediaSource(uri)
+
+        var audioUri = Uri.parse(getString(R.string.media_url_mp3))
+
+        var audioSource = ExtractorMediaSource.Factory(DefaultHttpDataSourceFactory("exoplayer-codelab")).createMediaSource(audioUri)
+
+        return ConcatenatingMediaSource(videoSource, audioSource)
     }
 
     override fun onStart() {
