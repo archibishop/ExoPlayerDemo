@@ -11,6 +11,8 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.dash.DashMediaSource
+import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
@@ -48,14 +50,16 @@ class MainActivity : Activity() {
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
 
-        var uri =  Uri.parse(getString(R.string.video_url_mp4))
+        var uri =  Uri.parse(getString(R.string.media_url_dash))
 
         var mediaSource = buildMediaSource(uri)
         player?.prepare(mediaSource, true, true)
     }
 
     private fun buildMediaSource(uri:Uri): MediaSource {
-        return ExtractorMediaSource.Factory(DefaultHttpDataSourceFactory("exoplayer-codelab")).createMediaSource(uri)
+        var manifestDataSourceFactory = DefaultHttpDataSourceFactory("ua")
+        var dashChuckSourceFactory = DefaultDashChunkSource.Factory(DefaultHttpDataSourceFactory("ua", BAND_WIDTH_METER))
+        return DashMediaSource.Factory(dashChuckSourceFactory, manifestDataSourceFactory).createMediaSource(uri)
     }
 
     override fun onStart() {
