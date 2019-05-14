@@ -11,8 +11,10 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 
@@ -25,6 +27,7 @@ class MainActivity : Activity() {
     private var playWhenReady = true
     private var currentWindow = 0
     private var playbackPosition: Long = 0
+    private val BAND_WIDTH_METER = DefaultBandwidthMeter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +38,17 @@ class MainActivity : Activity() {
     }
 
     private fun intializePlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(DefaultRenderersFactory(this), DefaultTrackSelector(), DefaultLoadControl())
+
+        var adaptiveTrackSelection = AdaptiveTrackSelection.Factory(BAND_WIDTH_METER)
+        player = ExoPlayerFactory.newSimpleInstance(DefaultRenderersFactory(this)
+            , DefaultTrackSelector(adaptiveTrackSelection)
+            , DefaultLoadControl())
         playerView.player =  player
 
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
 
-        var uri =  Uri.parse("https://archive.org/download/ElephantsDream/ed_hd.mp4")
+        var uri =  Uri.parse(getString(R.string.video_url_mp4))
 
         var mediaSource = buildMediaSource(uri)
         player?.prepare(mediaSource, true, true)
